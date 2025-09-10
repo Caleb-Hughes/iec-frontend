@@ -16,7 +16,7 @@ export default function Header ()  {
         {/*Header content container*/}
         <div className="max-w-6xl mx-auto flex items-center justify-between px-10 py-3">
             {/*Logo*/}
-            <Link to="/" onClick={close} className="flex items-center">
+            <Link to="/" onClick={handleLinkClick} className="flex items-center">
                 <img src={logo} alt="Logo" className=" h-14 w-auto pl-8" />
             </Link>
 
@@ -45,7 +45,7 @@ export default function Header ()  {
 
         {/*Mobile menu (Visible when menuOpen is true) */}
         <div className={`md:hidden absolute inset-x-0 top-full bg-pink-600 border-b shadow-sm transition-all duration-200 
-            ${menuOpen ? "Opacity-100 translate-y-0 pointer-events-auto" : "opacity-0 -translate-y-2 pointer-events-none"}`}
+            ${menuOpen ? "opacity-100 translate-y-0 pointer-events-auto" : "opacity-0 -translate-y-2 pointer-events-none"}`}
         >
             <nav className="flex flex-col px-4 pb-4 space-y-2 text-base">
                 <NavLink to="/about" onClick={handleLinkClick} className="block text-white hover:bg-pink-500 px-3 py-2 rounded">About us</NavLink>

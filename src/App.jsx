@@ -40,6 +40,7 @@ export default function App() {
       <div className ="bg-black border-0 m-0 p-0">
         <Header />
         <ScrollToTop />
+        <main className="pt-20 md:pt-24">
         <Routes>
           <Route path="/" element={<HomePage />} /> // Home route
           <Route path="/about" element={<AboutPage />} />
@@ -49,6 +50,10 @@ export default function App() {
           //Catch-all route for undefined paths
           <Route path="*" element={<HomePage />} />
         </Routes>
+        </main>
+      </div>
+      <div className="bg-black text-white text-center py-4">
+        &copy; {new Date().getFullYear()} IEC Public Pages. All rights reserved.
       </div>
     </BrowserRouter>
     
