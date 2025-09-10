@@ -52,7 +52,7 @@ export default function App() {
         </Routes>
         </main>
       </div>
-      <div className="bg-black text-white text-center py-4">
+      <div className="bg-black text-white text-sm text-center py-4">
         &copy; {new Date().getFullYear()} IEC Public Pages. All rights reserved.
       </div>
     </BrowserRouter>
