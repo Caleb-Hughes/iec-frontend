@@ -1,25 +1,56 @@
-import Header from './Components/Header'
+import {BrowserRouter, Routes, Route, Link, NavLink} from "react-router-dom";
+import {useEffect} from "react"
+import Header from './Components/NavBar'
 import Hero from './Components/Hero'
 import AboutUs from './Components/AboutUs'; // Assuming you have an AboutUs component
 import Team from './Components/Team';
 import Gallery from './Components/Gallery'
 import MainEnder from './Components/MainEnder';
-function App() {
 
-
+//function to scroll to top on route change
+function ScrollToTop() {
+    useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+  return null;
+}
+function HomePage() {
   return (
      <>
-     <div className="bg-black border-0">
-        <Header />
         <Hero />
-       <AboutUs />
-       <Team />
-       <Gallery/>
-       <MainEnder/>
-      </div>
+        <AboutUs />
+        <Team />
+        <Gallery/>
+        <MainEnder/>
     </>
       
   )
 }
+//Stub Route components 
+function AboutPage() {return <AboutUs />;}
+function TeamPage() {return <Team />;}
+function GalleryPage() {return <Gallery />;}
+function ContactPage() {return <MainEnder />;}
 
-export default App
+// Main App component with routing
+export default function App() {
+  return (
+    //BrowerRouter to enable SPA routing in the app
+    <BrowserRouter>
+      <div className ="bg-black border-0 m-0 p-0">
+        <Header />
+        <ScrollToTop />
+        <Routes>
+          <Route path="/" element={<HomePage />} /> // Home route
+          <Route path="/about" element={<AboutPage />} />
+          <Route path="/team" element={<TeamPage />} />
+          <Route path="/gallery" element={<GalleryPage />} />
+          <Route path="/contact" element={<ContactPage />} />
+          //Catch-all route for undefined paths
+          <Route path="*" element={<HomePage />} />
+        </Routes>
+      </div>
+    </BrowserRouter>
+    
+  )
+}

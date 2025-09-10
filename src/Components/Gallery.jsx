@@ -4,7 +4,7 @@ import GalleryGrid from './GalleryGrid'
 
 function Gallery() {
   return (
-    <section className="relative w-full min-h-screen bg-no-repeat bg-cover bg-center mt-5"
+    <section className="relative w-full min-h-[80vh] md:min-h-screen bg-no-repeat bg-cover bg-center mt-5 py-12"
         style={{backgroundImage: `url(${galleryBackground})`}}
     >
         <GalleryGrid/>
