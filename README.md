@@ -8,9 +8,3 @@ The app allows clients to browse services, select stylists, and book appointment
 - **Axios** (API calls)
 - **React Router** (navigation)
 
-**Features**
-- Calendar-based booking interface
-- Service & stylist selection
-- User authentication (JWT / Google OAuth if implemented)
-- Responsive design (mobile & desktop friendly)
-- Reusable UI components
