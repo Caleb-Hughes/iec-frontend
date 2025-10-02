@@ -284,8 +284,9 @@ export default function BookingPage() {
                 disabled={loading || services.length === 0}
             >
                 <option value="">Select a service</option>
-                {services.map(s => (
-                    <option key={s._id} value={s._id}>{s.name} - ${s.price}</option>
+                {Array.isArray(services) &&
+                    services.map(s => (
+                        <option key={s._id} value={s._id}>{s.name} - ${s.price}</option>
                 ))}
             </select>
             
@@ -300,7 +301,8 @@ export default function BookingPage() {
                 disabled={loading || loadingEligible || !selectedServiceId || eligibleStylists.size === 0}
             >
                 <option value="">Select a stylist</option>
-                {stylists.map(st => (
+                {Array.isArray(stylists) &&
+                    stylists.map(st => (
                     <option 
                         key={st._id} 
                         value={st._id} 
