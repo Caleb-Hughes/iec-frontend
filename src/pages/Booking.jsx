@@ -101,31 +101,40 @@ export default function BookingPage() {
     };
     //Loading services and stylists on component mount
     useEffect(() => {
-        let isMounted = true; // To avoid setting state on unmounted component
+        let mounted = true;
+
         (async () => {
             try {
-                // Fetching both services and stylists in parallel
-                const [servicesResponse, stylistsResponse] = await Promise.all([
+                const [servicesRes, stylistsRes] = await Promise.all([
                     apiClient.get('/services'),
-                    apiClient.get('/stylists')
+                    apiClient.get('/stylists'),
                 ]);
-                if (!isMounted) return; // Exit if component is unmounted
-                setServices(servicesResponse.data ?? []);
-                setStylists(stylistsResponse.data ?? []);
-                //Initally, all stylist are eligible
-                setEligibleStylists(new Set((stylistsResponse.data ?? []).map(st => st._id)));
-            } catch (err) {
-                if (!isMounted) return; // Exit if component is unmounted
-                setError('Failed to load data. Please try again later.');
-                setLoading(false);
-            } finally {
-                setLoading(false);
-            }
-        })();
-        return () => {
-            isMounted = false; // Cleanup flag on unmount
-        };
-    }, []);
+
+                if (!mounted) return;
+
+        // normalize any backend shape to an array
+        const toArray = (x) =>
+            Array.isArray(x) ? x
+            : Array.isArray(x?.data) ? x.data
+            : Array.isArray(x?.services) ? x.services
+            : Array.isArray(x?.items) ? x.items
+            : [];
+
+        const servicesArr = toArray(servicesRes?.data);
+        const stylistsArr = toArray(stylistsRes?.data);
+
+        setServices(servicesArr);
+        setStylists(stylistsArr);
+        setEligibleStylists(new Set(stylistsArr.map((st) => st._id)));
+    } catch (err) {
+      setError('Failed to load data. Please try again later.');
+    } finally {
+      setLoading(false);
+    }
+  })();
+
+  return () => { mounted = false; };
+}, []);
     //Create appointment on server
     const confirm = async () => {
         try{
@@ -279,14 +288,15 @@ export default function BookingPage() {
                 className="w-full h-14 bg-white text-gray-900 border-gray-200 rounded-2xl shadow-sm px-4 pr-10 appearance-none
                            focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-rose-500 disabled:bg-gray-100 disabled:text-gray-400
                            disabled:border-gray-300 disabled:cursor-not-allowed"
-                value={selectedServiceId || ''}
+                value={selectedServiceId}
                 onChange={(e) => setSelectedServiceId(e.target.value || null)}
                 disabled={loading || services.length === 0}
             >
                 <option value="">Select a service</option>
-                {Array.isArray(services) &&
-                    services.map(s => (
-                        <option key={s._id} value={s._id}>{s.name} - ${s.price}</option>
+                {(Array.isArray(services) ? services : []).map((s) => (
+                    <option key={s._id} value={s._id}>
+                        {s.name} - ${s.price}
+                    </option>
                 ))}
             </select>
             
@@ -301,8 +311,7 @@ export default function BookingPage() {
                 disabled={loading || loadingEligible || !selectedServiceId || eligibleStylists.size === 0}
             >
                 <option value="">Select a stylist</option>
-                {Array.isArray(stylists) &&
-                    stylists.map(st => (
+                {(Array.isArray(stylists) ? stylists : []).map((st) => (
                     <option 
                         key={st._id} 
                         value={st._id} 
