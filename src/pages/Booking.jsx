@@ -164,7 +164,12 @@ export default function BookingPage() {
         }
         confirm() //logged in continue to book 
     };
-
+    const toArray = (x) =>
+        Array.isArray(x) ? x
+        : Array.isArray(x?.data) ? x.data
+        : Array.isArray(x?.stylists) ? x.stylists
+        : Array.isArray(x?.items) ? x.items
+        : [];
     //When a service is selected, update eligible stylists
     useEffect(() => {
         //resetting selections
@@ -186,9 +191,9 @@ export default function BookingPage() {
             try {
                 const response = await apiClient.get('/stylists', {params: {serviceId: selectedServiceId}});
                 if (!isMounted) return;
-
+                const arr = toArray(response?.data);
                 //Building a set of eligible stylist IDs for quick lookup
-                setEligibleStylists(new Set((response?.data ?? []).map(st => st._id)));
+                setEligibleStylists(new Set((arr.map(st => st._id))));
             } catch (err) {
                 //fallback: client side filtering
                 const fallbackIds = stylists
