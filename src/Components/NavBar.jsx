@@ -26,12 +26,12 @@ export default function Header ()  {
                 <NavLink to="/team" className="hover:text-pink-500">Meet the Team</NavLink>
                 <NavLink to="/gallery" className="hover:text-pink-500">Gallery</NavLink>
                 <NavLink to="/contact" className="hover:text-pink-500">Contact</NavLink>
-                <a 
-                    href="#book"
+                <NavLink  
+                    to="/booking"
                     className="ml-4 border border-pink-500 text-pink-500 px-4 py-2 rounded hover:bg-pink-500 hover:text-white transition"
                 >
                     BOOK AN APPOINTMENT
-                </a>
+                </NavLink>
             </nav> 
             {/*Mobile hamburger menu icon (Visible on mobile) */}
             <button 
@@ -52,12 +52,13 @@ export default function Header ()  {
                 <NavLink to="/team" onClick={handleLinkClick} className="block text-white hover:bg-pink-500 px-3 py-2 rounded">Meet the Team</NavLink>
                 <NavLink to="/gallery" onClick={handleLinkClick} className="block text-white hover:bg-pink-500 px-3 py-2 rounded">Gallery</NavLink>
                 <NavLink to="/contact" onClick={handleLinkClick} className="block text-white hover:bg-pink-500 px-3 py-2 rounded">Contact</NavLink>
-                <a 
-                    href="#book"
+                <NavLink 
+                    to ="/booking"
+                    onClick={handleLinkClick}
                     className="block text-center border border-white text-white px-4 py-2 rounded hover:bg-white hover:text-pink-600 transition"
                 >
                     BOOK AN APPOINTMENT
-                </a>
+                </NavLink>
             </nav>
         </div>
     </header>
