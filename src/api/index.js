@@ -28,9 +28,9 @@ apiClient.interceptors.request.use(
 apiClient.interceptors.response.use(
     (response) => response,
     (error) => {
-        if (error.response && error.response.status === 401) {
-            // Handle unauthorized access - e.g., redirect to login
-            window.location.href = '/login'; // Adjust based on your routing strategy
+        if (error.response?.status === 401) {
+            localStorage.removeItem('iec_token');
+            localStorage.removeItem('token');
         }
         return Promise.reject(error);
     }

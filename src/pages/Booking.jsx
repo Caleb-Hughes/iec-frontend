@@ -1,10 +1,12 @@
 import {useEffect, useMemo, useState} from 'react';
 import {format} from 'date-fns';
-import {DayPicker} from 'react-day-picker';
 import {useAuth} from '../auth/AuthContext'
 import LoginPop from '../auth/LoginPop'
-import 'react-day-picker/dist/style.css';
+import BookingForm from "@/Components/booking/BookingForm";
+import TimeSlotSelector from "@/Components/booking/TimeSlotSelector";
+import ConfirmationPanel from "@/Components/booking/ConfirmationPanel";
 import apiClient from '../api/index';
+import {useNavigate } from 'react-router-dom';
 
 //Concvert Date object to "YYYY-MM-DD" format
 const isDate = (date) => format(date, 'yyyy-MM-dd');
@@ -28,9 +30,9 @@ export default function BookingPage() {
     //Stylists with eligible ID for selected service
     const [eligibleStylists, setEligibleStylists] = useState(new Set());
     //Selected service ID
-    const [selectedServiceId, setSelectedServiceId] = useState(null);
+    const [selectedServiceId, setSelectedServiceId] = useState('');
     //Selected stylist ID
-    const [selectedStylistId, setSelectedStylistId] = useState(null);
+    const [selectedStylistId, setSelectedStylistId] = useState('');
     //Selected date
     const [selectedDate, setSelectedDate] = useState(null);
     //Available time slots for selected stylist and date
@@ -45,13 +47,14 @@ export default function BookingPage() {
     const [loading, setLoading] = useState(true);
     const [loadingEligible, setLoadingEligible] = useState(false);
     const [error, setError] = useState(null);
-    const [showCalendar, setShowCalendar] = useState(false);
-    //rack when user clicked
+    //track when user clicked
     const [selectedSlot, setSelectedSlot] = useState(null);
+    const [successDetails, setSuccessDetails] = useState(null);
     const [confirming, setConfirming] = useState(false);
     const [confirmError, setConfirmError] = useState('');
     const [confirmSuccess, setConfirmSuccess] = useState(false);
     const [showConfirmDialogue, setShowConfirmDialogue] = useState(false);
+    const navigate = useNavigate();
 
     //Login popup visibility
     const [loginOpen, setLoginOpen] = useState(false);
@@ -76,27 +79,30 @@ export default function BookingPage() {
         h = h % 12 || 12;
         return `${h}:${min} ${ampm}`;
     };
-    const onSlotClick = (slot) => {
-        setSelectedSlot(slot);
-        setConfirmError('');
-        setShowConfirmDialogue(true);
-    };
     const normalizeSlots = (payload) => {
-        if (payload && Array.isArray(payload.availableSlots)) return payload.availableSlots;
+        if (!payload) return [];
 
-        if (Array.isArray (payload)) return payload;
+        // axios response shapes
+        if (Array.isArray(payload?.data)) return payload.data;
 
-        if (payload && Array.isArray(payload.slots)) return payload.slots;
+        if (Array.isArray(payload.availableSlots)) return payload.availableSlots;
+        if (Array.isArray(payload.slots)) return payload.slots;
 
-        if (payload && typeof payload === 'object') return Object.keys(payload);
+        if (Array.isArray(payload)) return payload;
 
-        if (typeof payload === 'string') {
-            try {
-                const parsed = JSON.parse(payload);
-                if (Array.isArray(parsed)) return parsed;
-            } catch {}
-            return payload.split(',').map((s) => s.trim()).filter(Boolean);
+        if (payload && typeof payload === "object") {
+            // if object of times -> booleans
+         return Object.keys(payload);
         }
+
+        if (typeof payload === "string") {
+            try {
+            const parsed = JSON.parse(payload);
+            if (Array.isArray(parsed)) return parsed;
+            } catch {}
+            return payload.split(",").map((s) => s.trim()).filter(Boolean);
+        }
+
         return [];
     };
     //Loading services and stylists on component mount
@@ -129,336 +135,293 @@ export default function BookingPage() {
     } catch (err) {
       setError('Failed to load data. Please try again later.');
     } finally {
-      setLoading(false);
+      if (mounted) setLoading(false);
     }
   })();
 
   return () => { mounted = false; };
 }, []);
-    //Create appointment on server
-    const confirm = async () => {
-        try{
-            setConfirming(true);
-            setConfirmError('');
-            await apiClient.post('/appointments', {
-                stylistId: selectedStylistId,
-                serviceId: selectedServiceId,
-                date: isDate(selectedDate),
-                time: selectedSlot
-            });
-            setShowConfirmDialogue(true)
-            setConfirmSuccess(true); //show success popup
-            setSelectedSlot(null)
-        } catch (e) {
-            console.error('Book failed:', e?.response?.data || e.message);
-            setConfirmError(e?.response?.data?.message || 'Could not book appointment');
-        } finally {
-            setConfirming(false);
-        }
-    };
-    const onConfirmClick = () => {
-        if (!selectedSlot) return; //guard
-        if (!user) {
-            setLoginOpen(true); //user not logged in and must open loginpop
-            return;
-        }
-        confirm() //logged in continue to book 
-    };
-    const toArray = (x) =>
-        Array.isArray(x) ? x
-        : Array.isArray(x?.data) ? x.data
-        : Array.isArray(x?.stylists) ? x.stylists
-        : Array.isArray(x?.items) ? x.items
-        : [];
-    //When a service is selected, update eligible stylists
-    useEffect(() => {
-        //resetting selections
-        setSelectedStylistId(null);
-        setSlots([]);
-        setSelectedDate(null);
-        setShowCalendar(false);
-        setSlotsError(null);
-        setHasSearched(false);
-        //if no service picked, keep every stylist visible and selectable
-        if (!selectedServiceId) {
-            setEligibleStylists(new Set(stylists.map(st => st._id)));
-            return;
-        }
 
-        let isMounted = true; // To avoid setting state on unmounted component
-        setLoadingEligible(true);
-        (async () => {
-            try {
-                const response = await apiClient.get('/stylists', {params: {serviceId: selectedServiceId}});
-                if (!isMounted) return;
-                const arr = toArray(response?.data);
-                //Building a set of eligible stylist IDs for quick lookup
-                setEligibleStylists(new Set((arr.map(st => st._id))));
-            } catch (err) {
-                //fallback: client side filtering
-                const fallbackIds = stylists
-                    .filter(st => Array.isArray(st.services) && st.services.includes(selectedServiceId))
-                    .map(st => st._id);
-                setEligibleStylists(new Set(fallbackIds));
-            } finally {
-                if (isMounted) setLoadingEligible(false);       
-            }
-        })();
-        return () => {
-            isMounted = false; // Cleanup flag on unmount
-        };
-    }, [selectedServiceId, stylists]);
-    
-    const canSearch = !!(selectedStylistId && selectedDate);
-    //When service changes: reset stylist, date, slots, errors
-    useEffect(() => {
-        //Reset downstream choices
-        setSelectedStylistId(null);
-        setSlots([]);
+useEffect(() => {
+    //reset downstream slctns
+    setSelectedStylistId("");
+    setSelectedDate(null)
+    setSlots([]);
+    setSelectedSlot(null);
+    setShowConfirmDialogue(false);
+    setSlotsError(null)
+    setHasSearched(false)
+
+    //if no service selectetd allow alal stylists
+
     if (!selectedServiceId) {
-        setEligibleStylists(new Set(stylists.map(st => st._id)));
-        return;
+        setEligibleStylists(new Set(stylists.map((st) =>st._id)));
+        return
     }
+
+    let isMounted = true;
+    setLoadingEligible(true);
+
     (async () => {
         try {
-            setLoadingEligible(true); // Show loading indicator
-            //Fetch eligible stylists from server
-            const response = await apiClient.get('/stylists', {params: {serviceId: selectedServiceId}});
-            setEligibleStylists(new Set((response?.data ?? []).map(st => st._id)));
-        } catch {
-            //fallback: client side filtering
+            const response = await apiClient.get("/stylists", {
+                params: {serviceId: selectedServiceId},
+            });
+
+            const arr = Array.isArray(response?.data)
+                ? response.data
+                : Array.isArray(response?.data?.data)
+                ? response.data.data
+                : Array.isArray(response?.data?.stylists)
+                ? response.data.stylists
+                : [];
+
+            if (!isMounted) return;
+
+            setEligibleStylists(new Set(arr.map((st) => st._id)));
+        } catch (err) {
+            //fallback 
             const ids = stylists
-                .filter(st => Array.isArray(st.services) && st.services.includes(selectedServiceId))
-                .map(st => st._id);
-            setEligibleStylists(new Set(ids));
+            .filter((st) => Array.isArray(st.services) && st.services.includes(selectedServiceId))
+            .map((st) => st._id)
+
+            if (isMounted) setEligibleStylists(new Set(ids));
         } finally {
-            setLoadingEligible(false);
+            if (isMounted) setLoadingEligible(false);
         }
     })();
-    }, [selectedServiceId, stylists]);
-    //Helper to check if a stylist is eligible for the selected service
-    const isStylistEligible = (stylistId) => !selectedServiceId || eligibleStylists.has(stylistId);
-
-    //fetch available time slots for selected stylist and date
-    const fetchAvailableTimeSlots = async () => {
-    //Guard clause
-    if (loadingSlots) return;
-    if (!selectedStylistId || !selectedDate) return;
-    setSlotsError(null);
-    setHasSearched(true)
-
-    try {
-        setError("");
-        setLoadingSlots(true);
-
-        //Ask API for that stylist's slots on yyyy-mm-dd 
-        const response = await apiClient.get(
-            `/stylists/${selectedStylistId}/available-slots`,
-            {params: {date: isDate(selectedDate), serviceId: selectedServiceId}}
-        );
-    //Normalize to array
-    const payload = response?.data;
-    const slotsArray = Array.isArray(payload?.availableSlots) ? payload.availableSlots : normalizeSlots(payload)
-    setSlots(Array.isArray(slotsArray) ? slotsArray : []);
-
-    } catch (err) {
-        setSlots([]);
-        setSlotsError("Failed to load available time slots. Please try again later.");
-    }
-    finally {
-        setLoadingSlots(false);
-    }
+    return () => {
+        isMounted = false;
     };
-    //Week strip (Sun-Sat) for calendar navigation
-    //Grouping available slots by time of day
+}, [selectedServiceId, stylists]);
+    const isStylistEligible = (stylistId) => 
+        !selectedServiceId || eligibleStylists.has(stylistId);
+
+    const filteredStylists = useMemo(() => {
+        return (stylists || []).filter((st) => isStylistEligible(st._id));
+    }, [stylists, eligibleStylists, selectedServiceId]);
+
+
+    const fetchAvailableTimeSlots = async () => {
+        console.log("fetchAvailableTimeSlots fired");
+        if (loadingSlots) return;
+        if (!selectedStylistId || !selectedDate) return;
+
+        setHasSearched(true);
+        setSlotsError(null);
+
+        try {
+            setLoadingSlots(true);
+
+            const response = await apiClient.get(
+                `/stylists/${selectedStylistId}/available-slots`,
+                {params: {date: isDate(selectedDate), serviceId: selectedServiceId}}
+            );
+
+            const slotsArray = normalizeSlots(response?.data);
+            setSlots(Array.isArray(slotsArray) ? slotsArray: []);
+        } catch (err) {
+            console.error(err);
+            setSlots([]);
+            setSlotsError("Failed to load available time slots. Please try again later.");
+        } finally {
+            setLoadingSlots(false);
+        }
+    };
+    // Gropu slots for UI
+
     const groupedSlots = useMemo(() => {
-        const groups = {Morning: [], Afternoon: [], Evening: []};  
-        //Nake defensive
-        const list = Array.isArray(slots) ? slots : [];
-        list.forEach(slot => {
-            const group = groupTimeSlots(slot);
-            if (groups[group]) {
-                groups[group].push(slot);
-            }
+        const groups = {Morning: [], Afternoon: [], Evening: []};
+        (Array.isArray(slots) ? slots : []).forEach((slot) => {
+            const key = groupTimeSlots(slot);
+            groups[key].push(slot);
         });
         return groups;
     }, [slots]);
+
+    //Slot click to open confirm panel
+    const onSelectedSlot = (slot) => {
+        setSelectedSlot(slot);
+        setConfirmError("");
+        setShowConfirmDialogue(true)
+    };
+
+    //Backend post to confirm appointment
+
+    const confirm = async () => {
+        try {
+            setConfirming(true);
+            setConfirmError("");
+
+            //Guaard
+
+            if(!selectedServiceId || !selectedStylistId || !selectedDate || !selectedSlot ) {
+                setConfirmError('Missing booking information (service, stylist, date, or time).');
+                return;
+            }
+
+            //Iso datetime
+            const [hh, mm] = String(selectedSlot).split(":").map(Number);
+            const localDateTime = new Date(selectedDate);
+            localDateTime.setHours(hh, mm, 0, 0);
+
+            const payload = {
+                service: selectedServiceId,
+                stylist: selectedStylistId,
+                date: localDateTime.toISOString(),
+            };
+
+            const res = await apiClient.post("/appointments", payload);
+            console.log("book success:", res.data);
+
+            setSuccessDetails({
+                date: selectedDate,
+                time: selectedSlot,
+                stylist: stylists.find((st) => st._id === selectedStylistId),
+                service: services.find((s => s._id === selectedServiceId)),
+            });
+
+
+            setConfirmSuccess(true);
+            setShowConfirmDialogue(false);
+            setSelectedSlot(null);
+        } catch (e) {
+            console.error("Book failed:", e);
+            setConfirmError(e?.response?.data?.message || "Could not book appointment");
+        } finally {
+            setConfirming(false);
+        }
+
+    };
+
+    const onConfirmClick = () => {
+        if (!selectedSlot) return;
+        
+        if (!user) {
+            setLoginOpen(true);
+            return;
+        }
+
+        confirm();
+    };
+
+    const selectedStylistName = stylists.find((st) => st._id === selectedStylistId)?.name || "Selected Stylist";
+    const selectedServiceName = services.find((s) => s._id === selectedServiceId)?.name || "Selected Service";
+
     return (
-        <div className="p-6 max-w-4xl mx-auto">
-            <h2 className="text-2xl font-bold mb-4">Book an Appointment</h2>
+        <div className ="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100">
+            <main className="py-10 px-4 sm:px-6 lg:px-8">
+                <div className="max-w-7xl mx-auto space-y-6">
+                    {/* step 1-3: Form*/}
+                    <BookingForm
+                        services={services}
+                        stylists={filteredStylists}
+                        selectedServiceId={selectedServiceId}
+                        setSelectedServiceId={setSelectedServiceId}
+                        selectedStylistId={selectedStylistId}
+                        setSelectedStylistId={setSelectedStylistId}
+                        selectedDate={selectedDate}
+                        setSelectedDate={setSelectedDate}
+                        onSearch={fetchAvailableTimeSlots}
+                        searching={loadingSlots}
+                        loadingServices={loading}
+                        loadingStylist={loadingEligible}
+                        disableStylistSelect={!selectedServiceId || loadingEligible}
+                    />
+                    {error ? (
+                        <div className="max-w-4xl mx-auto text-sm text-red-600">
+                            {error}
+                        </div>
+                    ) : null }
 
-            {/*Service Selection*/}
-            <label className="block text-sm font-medium mb-1">Service</label>
-            <select
-                className="w-full h-14 bg-white text-gray-900 border-gray-200 rounded-2xl shadow-sm px-4 pr-10 appearance-none
-                           focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-rose-500 disabled:bg-gray-100 disabled:text-gray-400
-                           disabled:border-gray-300 disabled:cursor-not-allowed"
-                value={selectedServiceId}
-                onChange={(e) => setSelectedServiceId(e.target.value || null)}
-                disabled={loading || services.length === 0}
-            >
-                <option value="">Select a service</option>
-                {(Array.isArray(services) ? services : []).map((s) => (
-                    <option key={s._id} value={s._id}>
-                        {s.name} - ${s.price}
-                    </option>
-                ))}
-            </select>
-            
-            {/*Stylist Selection*/}
-            <label className="block text-sm font-medium mb-1">Stylist</label>
-            <select
-                className="w-full h-14 bg-white text-gray-900 border-gray-200 rounded-2xl shadow-sm px-4 pr-10 appearance-none
-                           focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-rose-500 disabled:bg-gray-100 disabled:text-gray-400
-                           disabled:border-gray-300 disabled:cursor-not-allowed"
-                value={selectedStylistId || ''}
-                onChange={(e) => setSelectedStylistId(e.target.value || null)}
-                disabled={loading || loadingEligible || !selectedServiceId || eligibleStylists.size === 0}
-            >
-                <option value="">Select a stylist</option>
-                {(Array.isArray(stylists) ? stylists : []).map((st) => (
-                    <option 
-                        key={st._id} 
-                        value={st._id} 
-                        disabled={!isStylistEligible(st._id)}
-                        className={!isStylistEligible(st._id) ? 'text-gray-400' : ''}
-                    >
-                        {st.name} { !isStylistEligible(st._id) ? '(Not available for selected service)' : ''}
-                    </option>
-                ))}
-            </select>
-            {/*Date dropdown */}
-            <div className="relative w-64 mb-4">
-                <label className="block text-sm font-medium mb-1">Date </label>
-                <button
-                    type="button"
-                    className="border rounded-lg px-3 py-2 w-full text-left bg-white"
-                    onClick={() => setShowCalendar((v) => !v)}
-                    disabled={!selectedServiceId || !selectedStylistId}
-                >
-                    {selectedDate ? format(selectedDate, 'PP') : 'Select a date'}
-                </button>
-
-                {showCalendar && (
-                    <div className="absolute left-0 mt-2 z-50 rounded-lg border bg-white shadow-lg">
-                        <DayPicker
-                            mode="single"
-                            selected={selectedDate}
-                            onSelect={(day) => {
-                                if (day) setSelectedDate(day);
-                                setShowCalendar(false);
-                                setSlots([]);
-                                setHasSearched(false);
-                            }}
+                    {slotsError ? (
+                        <div className="max-w-4xl mx-auto text-sm text-red-600">{slotsError}</div>
+                    ) : null}
+                    {hasSearched && !loadingSlots && slots.length === 0 && selectedDate && selectedStylistId ? (
+                        <div className="max-w-4xl mx-auto text-sm text-gray-600">
+                            No Available time sloots found on {format(selectedDate, "PP")}. Try anotger day or stylist.
+                        </div>
+                    ) : null}
+                    
+                    {/*Time slots*/}   
+                    {!loadingSlots && slots.length > 0 && (
+                        <TimeSlotSelector
+                            staffName={selectedStylistName}
+                            serviceName={selectedServiceName}
+                            groupedSlots={groupedSlots}
+                            selectedSlot={selectedSlot}
+                            onSelectedSlot={onSelectedSlot}
+                            to12h={to12h}
                         />
-                    </div>
-                )}
-            </div>
-            {/*Fetch Slots Button*/}
-            <button 
-                onClick={fetchAvailableTimeSlots}
-                disabled={!canSearch}
-                className="bg-rose-500 hover:bg-rose-600 text-white rounded-lg px-4 py-2 disabled:opacity-40"
-            >
-                Search
-            </button>
-            {/*Any Error Message*/}
-            {error && <div className="text-red-500 mb-4">{error}</div>}
-            {/*Loading Indicator*/}
-            {(loading || loadingEligible) && <div className="mb-4">Loading...</div>}
-
-            {/*Results Section (only rended if times found)*/}
-            {!loadingSlots && slots.length > 0 && (
-                <>
-                    <div className="rounded-xl border bg-white p-4 shadow-sm">
-                        {/*Header area showing selectetd stylist and service*/}
-                        <div className="flex items-center justify-between">
-                            <div className="font-semibold">
-                                {stylists.find(st => st._id === selectedStylistId)?.name || 'Selected Stylist'}
+                    )}
+                    {/*Coonfirm Panel*/}
+                    {showConfirmDialogue && selectedSlot && (
+                        <ConfirmationPanel
+                            selectedDate={selectedDate}
+                            selectedTimeLabel={to12h(selectedSlot)}
+                            stylistName={selectedStylistName}
+                            serviceName={selectedServiceName}
+                            onConfirm={onConfirmClick}
+                            onCancel={() => {
+                                setShowConfirmDialogue(false);
+                                setSelectedSlot(null);
+                                setConfirmError("");
+                            }}
+                            confirming={confirming}
+                                    errorMessage={confirmError}
+                                />
+                            )}
+        
+                            {/*Login popup*/}
+                            <LoginPop
+                                open={loginOpen}
+                                onClose={() => setLoginOpen(false)}
+                                onSuccess={() => {
+                                    setLoginOpen(false);
+                                    confirm();
+                                }}
+                            />
+                            {/* Success Modal */}
+                            {confirmSuccess && successDetails && (
+                                <div className="fixed inset-0 z-50 grid place-items-center bg-black/50">
+                                    <div className="bg-white rounded-2xl w-[360px] p-5">
+                                        <h3 className="font-semibold text-lg mb-2">Appointment booked!</h3>
+                                            <p className="font-semihold text-lg mb-2">
+                                            You&apos;re all set for {" "}
+                                            {successDetails?.date ? format(new Date(successDetails.date), "PP") : ""}{" "}
+                                            at {to12h(successDetails.time)} with {successDetails.stylist?.name}.
+                                            </p>
+                                            <div className="mt-4 justify-center flex gap-3">
+                                                <button
+                                                    className="bg-gray-900 text-white rounded-lg px-4 py=2 cursoor0pointer"
+                                                    onClick={() => navigate("/")}
+                                                >
+                                                Return To Home
+                                                </button>
+                                            </div>
+                                    </div>
+                                </div>
+                            )}
+                            {/*Error Modal*/}
+                            {!showConfirmDialogue && confirmError ? (
+                                <div className="fixed inset-0 z-50 grid place-items-center bg-black/50">
+                                    <div className="bg-white rounded-2xl w-[360px] p-5">
+                                        <h3 className="font-semibold text-lg mb-2">Booking Failed</h3>
+                                        <p className="text-sm text-red-600">{confirmError}</p>
+                                        <div className="mt-4 text-right">
+                                            <button 
+                                                className="bg-gray-900 text-white rounded-lg px-3 py-2"
+                                                onClick={() => setConfirmError("")}
+                                            >
+                                                Close
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            ) : null}
                         </div>
-                        {selectedServiceId && (
-                            <div className="text-sm text-gray-500">
-                                {services.find(s => s._id === selectedServiceId)?.name || 'Selected Service'}
-                            </div>
-                        )}
-                    </div>
+                    </main>
                 </div>
-
-            {/*Time slots grouped by time of day*/}
-            <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
-                {['Morning', 'Afternoon', 'Evening'].map(period => (
-                    <div key={period}>
-                        <div className="mb-2 text-sm font-medium text-gray-500">{period}</div>
-                            <div className="flex flex-wrap gap-2">
-                                {(groupedSlots[period] ?? []).map((slot) => (
-                                <button
-                                    key={slot}
-                                    className={`rounded-lg border bg-white px-3 py-2 ${selectedSlot===slot ? 'bg-rose-500 text-white' : 'bg-white'}`}
-                                    onClick={() => 
-                                        onSlotClick(slot)
-                                    }
-                                >
-                                    {to12h(slot)}
-                                </button>       
-                            ))}
-                            </div>
-                    </div>
-                    ))}
-                </div>
-                <LoginPop
-                    open={loginOpen}
-                    onClose={()=> setLoginOpen(false)}
-                    onSuccess={confirm}
-                />
-                {showConfirmDialogue && selectedSlot && (
-                <div className="mt-4 flex items-center justify-between rounded-xl border bg-white p-4 shadow-sm">
-                    <div className="text-sm text-gray-700">
-                        Confirm {format(selectedDate, 'PP')} at {to12h(selectedSlot)} with{' '}
-                        {stylists.find(st => st._id === selectedStylistId)?.name}
-                    </div>
-                    <div className="flex gap-2">
-                        <button
-                            className="rounded-lg border px-3 py-2"
-                            onClick={() => {
-                            setShowConfirmDialogue(false);
-                            setSelectedSlot(null);
-                        }}
-                    >
-                        Cancel
-                    </button>
-                    <button
-                        className="bg-rose-500 text-white rounded-lg px-4 py-2 disabled:opacity-40"
-                        onClick={onConfirmClick}
-                        disabled={confirming}
-                    >
-                        {confirming ? 'Booking…' : 'Confirm appointment'}
-                    </button>
-                </div>
-            </div>
-        )}
-                {/* Error modal */}
-                {confirmError && (
-                    <div className="fixed inset-0 z-50 grid place-items-center bg-black/50">
-                        <div className="bg-white rounded-2xl w-[360px] p-5">
-                            <h3 className="font-semibold text-lg mb-2">Booking failed</h3>
-                            <p className="text-sm text-red-600">{confirmError}</p>
-                            <div className="mt-4 text-right">
-                                <button
-                                    className="bg-gray-900 text-white rounded-lg px-3 py-2"
-                                    onClick={() => setConfirmError('')}
-                                >
-                                    Close
-                                </button>
-                            </div>
-                        </div>
-                     </div>
-                )}
-            </>
-        )}
-        {/*show empty state if no slots found*/}
-        {hasSearched && !loadingSlots && slots.length === 0 && selectedStylistId && selectedDate && (
-            <div className="text-gray-500 mt-4">No available time slots found on {format(selectedDate, 'PP')}. Try another day or stylist</div> 
-        )}
-    </div>
-    );
-}
+            );
+        }
+   

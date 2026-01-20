@@ -35,32 +35,23 @@ export const usePrevNextButtons = (emblaApi) => {
     }
 }
 
-export const PrevButton = (props) => {
-    const {children, className ='', ...restProps} = props
+//arrow button components
+export const PrevButton = ({ className = "", ...rest }) => (
+    <button 
+        type="button"
+        className={`w-12 h-12 rounded-full shadow-lg flex items-center justify-center bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-700 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all ${className}`}
+        {...rest}
+    >
+        <FaChevronLeft className="w-5 h-5 text-black" />
+    </button>
+)
 
-    return (
-        <button 
-        type ="button"
-        className={`absolute left-68 top-1/2 -translate-y-1/2 z-10 bg-white hover:bg-pink-500 rounded-full p-2 shadow transition ${className}`}
-        {...restProps}
-        >
-            <FaChevronLeft className="w-5 h-5 text-black" />
-            {children}
-        </button>
-    )
-}
-
-export const NextButton = (props) => {
-    const {children, className = '', ...restProps} = props
-    
-    return (
-        <button
-            type="button"
-            className={`absolute right-72 top-1/2 -translate-y-1/2 z-10 bg-white hover:bg-pink-500 rounded-full  p-2 shadow transition ${className}`}
-            {...restProps}
-        >
-            <FaChevronRight className="w-5 h-5 text-black" />
-            {children}
-        </button>
-    )
-}
+export const NextButton = ({ className = "", ...rest }) => (
+    <button
+        type="button"
+        className={`w-12 h-12 rounded-full shadow-lg flex items-center justify-center bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-700 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all ${className}`}
+        {...rest}
+    >
+        <FaChevronRight className="w-5 h-5 text-black" />
+    </button>
+)

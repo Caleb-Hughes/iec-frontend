@@ -30,8 +30,10 @@ export default function LoginPop({open, onClose, onSuccess}) {
     };
     const handleGoogleLogin = () => {
         //open Google OAuth flow
-        window.location.href = `${import.meta.env.VITE_API_URL}/auth/google`;
-    };
+        const targetUrl = `${import.meta.env.VITE_API_URL}/auth/google`;
+        console.log("Attemmpting redicrect to:", targetUrl);
+        window.location.href = targetUrl
+       };
     
     return (
         <div className="fixed inset-0 z-50 grid place-items-center bg-black/50">
@@ -64,6 +66,7 @@ export default function LoginPop({open, onClose, onSuccess}) {
                 </div>
                 {/*Google Login*/}
                 <button
+                    type="button"
                     onClick={handleGoogleLogin}
                     className="flex items-center justify-center w-full border rounded-lg px-3 py-2 hover:bg-gray-50"
                 >

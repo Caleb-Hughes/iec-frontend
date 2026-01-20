@@ -1,21 +1,24 @@
 import {BrowserRouter, Routes, Route, Link, NavLink} from "react-router-dom";
 import {useEffect} from "react";
-import {useAuth} from './auth/AuthContext';
-import{useNavigate} from 'react-router-dom';
+import {AuthProvider, useAuth} from './auth/AuthContext';
+import{useNavigate, useLocation} from 'react-router-dom';
 import apiClient from "./api";
 import Header from './Components/NavBar'
 import Hero from './Components/Hero'
+import Footer from './Components/Footer'
 import AboutUs from './pages/About'; 
 import Team from './pages/Team';
 import Gallery from './pages/Gallery'
 import MainEnder from './pages/Contact';
 import BookingPage from './pages/Booking'
 
+
 //function to scroll to top on route change
 function ScrollToTop() {
+  const {pathname} = useLocation();
     useEffect(() => {
     window.scrollTo(0, 0);
-  }, []);
+  }, [pathname]);
   return null;
 }
 // Home page component combining all sections
@@ -59,7 +62,8 @@ export {OAuthSuccess};
 export default function App() {
   return (
     //BrowerRouter to enable SPA routing in the app
-    <BrowserRouter>
+  <AuthProvider>
+   <BrowserRouter>
       <div className ="bg-black border-0 m-0 p-0">
         <Header />
         <ScrollToTop />
@@ -78,10 +82,9 @@ export default function App() {
         </Routes>
         </main>
       </div>
-      <div className="bg-black text-white text-xs md:text-sm text-center py-4">
-        &copy; {new Date().getFullYear()} IEC Public Pages. All rights reserved.
-      </div>
+      <Footer />
+
     </BrowserRouter>
-    
+  </AuthProvider> 
   )
 }

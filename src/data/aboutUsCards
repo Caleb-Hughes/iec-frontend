@@ -1,0 +1,9 @@
+import { Award, Heart, Sparkles, Users } from "lucide-react";
+const features = [
+  { icon: Heart, title: "Empowerment", description: "Supporting each member to grow and flourish in the beauty industry" },
+  { icon: Users, title: "Community", description: "A welcoming space where relationships and skills develop together" },
+  { icon: Sparkles, title: "Excellence", description: "Delivering exceptional service with attention to every detail" },
+  { icon: Award, title: "Growth", description: "Continuous learning and development in a supportive environment" },
+];
+
+export default features;
