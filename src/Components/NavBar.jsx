@@ -4,7 +4,6 @@ import {HiOutlineBars3, HiOutlineXMark} from 'react-icons/hi2';
 import {User, LogOut, LogIn} from "lucide-react";
 import {useAuth} from '../auth/AuthContext';
 import LoginPop from '../auth/LoginPop';
-
 import logo from './../assets/Imgs/logo.png'; 
 
 //function to close mobile menu on link click
@@ -22,7 +21,7 @@ export default function Header ()  {
     //Handle Sign Out
     const handleSignOut = () => {
         logout();
-        setMenuOpen
+        setMenuOpen(false);
     }
 
     return (
@@ -41,10 +40,15 @@ export default function Header ()  {
                 <NavLink to="/team" className="hover:text-pink-500">Meet the Team</NavLink>
                 <NavLink to="/gallery" className="hover:text-pink-500">Gallery</NavLink>
                 <NavLink to="/contact" className="hover:text-pink-500">Contact</NavLink>
+                {user && (
+                    <NavLink to="/appointments" onClick={handleLinkClick} className="hover:text-pink-500">
+                        My Appointments
+                    </NavLink>
+                )}
 
                 {/*Auth Section*/}
                 {user ? (
-                    <div className="flex items-center gap-4 border-1 border-gray-300 pl-4 ml-2">
+                    <div className="flex items-center gap-4 border-l border-gray-300 pl-4 ml-2">
                         <span className="text-sm font-medium text-gray-600 flex items-center gap-1">
                             <User className="w-4 h-4 text-pink-500"/>
                             {/*Display Users Name or fallback*/}
@@ -52,7 +56,7 @@ export default function Header ()  {
                         </span>
                         <button
                             onClick={logout}
-                            className="text-gray-500 hover:text-pink-600 transition text-sm font-medium"
+                            className="text-gray-500 hover:text-pink-600 transition text-sm font-medium cursor-pointer"
                             title="Sign Out"
                         >
                             Sign Out 
@@ -61,7 +65,7 @@ export default function Header ()  {
                 ) : (
                     <button
                         onClick={() => setLoginOpen(true)}
-                        className="hover:tetxt-pink-500 transition font-medium flex items-center gap-1 ml-2"
+                        className="hover:text-pink-500 transition font-medium flex items-center gap-1 ml-2 cursor-pointer"
                     >
                         <LogIn className="w-4 h-4"/>
                         Sign In
@@ -93,6 +97,11 @@ export default function Header ()  {
                 <NavLink to="/team" onClick={handleLinkClick} className="block text-white hover:bg-pink-500 px-3 py-2 rounded">Meet the Team</NavLink>
                 <NavLink to="/gallery" onClick={handleLinkClick} className="block text-white hover:bg-pink-500 px-3 py-2 rounded">Gallery</NavLink>
                 <NavLink to="/contact" onClick={handleLinkClick} className="block text-white hover:bg-pink-500 px-3 py-2 rounded">Contact</NavLink>
+                {user && (
+                    <NavLink to="/appointments" onClick={handleLinkClick} className="block text-white hover:bg-pink-500 px-3 py-2 rounded">
+                        My Appointments
+                    </NavLink>
+                )}
                 
                 <div className="border-t border-pink-400 pt-2 mt-2">
                     {user ? (
@@ -103,7 +112,7 @@ export default function Header ()  {
                             </div>
                             <button
                                 onClick={handleSignOut}
-                                className="w-full text-left block text-white hover:bg-pink-500 px-3 py-2 rounded flex items-center gap-2"
+                                className="w-full text-left block text-white hover:bg-pink-500 px-3 py-2 rounded flex items-center gap-2 cursor-pointer"
                             >
                                 <LogOut className="w-4 h-4"/> Sign Out
                             </button>
@@ -114,7 +123,7 @@ export default function Header ()  {
                                 setMenuOpen(false);
                                 setLoginOpen(true);
                             }}
-                            className="w-full text-left block text-white hover:bg-pink-500 px-3 py-2 rounded flex items-center gap-2"
+                            className="w-full text-left block text-white hover:bg-pink-500 px-3 py-2 rounded flex items-center gap-2 cursor-pointer"
                         >
                             <LogIn className="w-4 h-4"/> Sign In
                         </button>

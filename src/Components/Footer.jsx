@@ -1,9 +1,8 @@
-import {Heart, Instagram, Facebook} from "lucide-react";
-import {Navigate, useNavigate } from "react-router-dom";
+import {Heart, Instagram, Facebook, Link2Off} from "lucide-react";
+import { Link } from "react-router-dom";
 import logo from './../assets/Imgs/logo.png';
 export function Footer() {
     const currentYear = new Date().getFullYear(); // Get the current year
-    const navigate = useNavigate();
     return (
         <footer className = "bg-gray-900 text-white py-12">
             <div className = "max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -12,7 +11,7 @@ export function Footer() {
                     <div className="col-span-2"> 
                        <div className="flex items-center mb-4">
                             <div className="w-12 h-12 flex items-center justify-center">
-                                <img src={logo} alt="Logo" className="w-full h-full object-cover rounded-full" />
+                                 <img src={logo} alt="Logo" className="w-full h-full object-cover rounded-full" />
                             </div>
                             <span className="ml-3 font-semibold text-lg">Image Enhancement Center</span>
                         </div>
@@ -39,36 +38,27 @@ export function Footer() {
                         <h3 className="font-semibold text-white mb-4">Quick Links</h3>
                         <ul className ="space-y-2">
                             <li>
-                                <button
-                                    onClick={() => navigate('/about')}
-                                    className="text-gray-400 hover:text-pink-400 transition-colors cursor-pointer"
-                                    >
+                                <Link to="/" className="text-gray-400 hover:text-pink-400 transition-colors cursor-pointer">
+                                    Home
+                                </Link>
+                            </li>
+                            <li>
+                                <Link to="/about" className="text-gray-400 hover:text-pink-400 transition-colors cursor-pointer"> 
                                     About Us
-                                </button>
+                                </Link>
                             </li>
                             <li>
-                                <button
-                                    onClick={() => navigate('/team')}
-                                    className="text-gray-400 hover:text-pink-400 transition-colors cursor-pointer"
-                                    >
+                                <Link to="/team" className="text-gray-400 hover:text-pink-400 transition-colors cursor-pointer">
                                     Our Team
-                                </button>
+                                </Link>
                             </li>
                             <li>
-                                <button
-                                    onClick={() => {
-                                        const element = document.getElementById('contact');
-                                        if (element) {
-                                            element.scrollIntoView({ behavior: 'smooth' });
-                                        }}
-                                    }
-                                        className="text-gray-400 hover:text-pink-400 transition-colors cursor-pointer"
-                                        >
-                                        Contact Us
-                                        </button>
-                                </li>
-                            </ul>
-                        </div>
+                                <Link to="/contact" className="text-gray-400 hover:text-pink-400 transition-colors cursor-pointer">
+                                    Contact Us
+                                </Link>
+                            </li>
+                        </ul>
+                    </div>
                         {/*Contact Inforamtion */}
                         <div>
                             <h3 className="font-semibold text-white mb-4">Contact</h3>

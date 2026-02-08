@@ -18,7 +18,7 @@ function ContactSection() {
                             {/* Section Header */}
                             <motion.div
                                 initial={{opacity: 0, y: 30}} // Start slightly below and transparent
-                                animate={inView ? {opacity: 1, y: 0} : {}} // Animate to visible and in place when in view
+                                animate={{opacity: 1, y: 0}} // Animate to visible and in place when in view
                                 transition={{duration: 0.8}} // Animation duration
                                 className="text-center mb-16"
                             >
@@ -39,7 +39,7 @@ function ContactSection() {
                                 {/* Contact Info */}
                                 <motion.div
                                     initial={{opacity: 0, x: -50}} // Start hidden and shifted left
-                                    animate={inView ? {opacity: 1, x: 0} : {}} // Animate to visible and in place when in view
+                                    animate={{opacity: 1, x: 0}} // Animate to visible and in place when in view
                                     transition={{duration: 0.8, delay: 0.2 }} // Animation duration
                                     className="space-y-8"
                                 >
@@ -115,7 +115,7 @@ function ContactSection() {
                                 {/* Stacked maps on right column */}
                                 <motion.div
                                     initial={{opacity: 0, x: 50}} // Start hidden and shifted right
-                                    animate={inView ? {opacity: 1, x: 0} : {}} // Animate to visible and in place when in view
+                                    animate={{opacity: 1, x: 0}} // Animate to visible and in place when in view
                                     transition={{duration: 0.8, delay: 0.4 }} // Animation duration
                                     className="space-y-8 mt-10 lg:mt-0"
                                 >
@@ -123,7 +123,7 @@ function ContactSection() {
                                         <motion.div
                                             key={loc.id}
                                             initial={{opacity: 0, y: 20}} // Start slightly below and transparent
-                                            animate={inView ? {opacity: 1, y: 0} : {}} // Animate to visible and in place when in view
+                                            animate={{opacity: 1, y: 0}} // Animate to visible and in place when in view
                                             transition={{duration: 0.6, delay: 0.5 + idx * 0.15}} // Stagger each map
                                             className="rounded-2xl overflow-hidden shadow-2xl bg-white"
                                         >

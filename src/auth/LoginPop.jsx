@@ -5,6 +5,8 @@ import {useAuth} from './AuthContext';
 
 export default function LoginPop({open, onClose, onSuccess}) {
     const { setUser } = useAuth();
+    const [isRegister, setIsRegister] = useState(false);
+    const [name, setName]  = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [err,setErr] = useState('')
@@ -16,64 +18,112 @@ export default function LoginPop({open, onClose, onSuccess}) {
         try {
             setBusy(true); 
             setErr('');
-            const r = await apiClient.post(
-                '/auth/login', 
-                {email: email.trim().toLowerCase(), password},
-                {withCredentials: true}
+            //Choosing endpoint based on mode
+            const route = isRegister ? '/auth/register' : '/auth/login' ;
+
+            const payload = isRegister 
+                ? {name, email: email.trim().toLowerCase(), password}
+                : {email: email.trim().toLowerCase(), password};
+
+            const r = await apiClient.post(route, payload, {withCredentials: true}
             );
             setUser(r.data.user);
             onSuccess?.();
             onClose?.();
         } catch (e) {
-            setErr(e?.response?.data?.message || e.message || 'Login failed');
+            const data = e?.response?.data;
+            const msg = data?.message || (data?.errors ? data.errors.map(x => x.msg).join(", ") : null) || e.message || "Login failed";
+        setErr(msg);
+
         } finally {setBusy(false); }
     };
     const handleGoogleLogin = () => {
         //open Google OAuth flow
-        const targetUrl = `${import.meta.env.VITE_API_URL}/auth/google`;
+        const targetUrl = `${import.meta.env.VITE_API_URL}/api/auth/google`;
         console.log("Attemmpting redicrect to:", targetUrl);
         window.location.href = targetUrl
        };
     
     return (
         <div className="fixed inset-0 z-50 grid place-items-center bg-black/50">
-            <div className="bg-white rounded-2xl w-[360px] p-5">
-                {/*email input*/}
-                <h3 className="font-semibold text-lg rounded-lg px-3 py-2 mb-2">Sign in to continue</h3>
-                <input className="w-full border rounded-lg px-3 py-2 mb-2"
-                    placeholder="Email" 
-                    value={email} 
-                    onChange={(e) => setEmail(e.target.value)} 
-                    autoFocus
+            <div className="bg-white rounded-2xl w-[360px] p-5">            {/*Dynamic Title*/}
+                <h3 className="font-semibold text-lg mb-2">
+                    {isRegister ? 'Create an Account' : 'Sign in to continue'}
+                </h3>
+
+                {/*Show Name input only if registering*/}
+                {isRegister && (
+                    <input
+                        className="w-full border rounded-lg px-3 py-2 mb-2"
+                        placeholder="Full Name"
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                        disabled={busy}
+                    />
+                )}
+            
+                <input
+                    className="w-full border rounded-lg px-3 py-2 mb-2"
+                    placeholder="Email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    autoFocus={!isRegister}
                     disabled={busy}
                 />
-                {/*password input */}
-                <input className="w-full border rounded-lg px-3 py-2 mb-3" type="password"
-                    placeholder="Password" value={password} onChange={e=>setPassword(e.target.value)} />
+                <input 
+                    className="w-full border rounded-lg px-3 py-2 mb-3"
+                    type="password"
+                    placeholder="Password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                />
+
                 {err && <div className="text-red-600 text-sm mb-3">{err}</div>}
+
                 <div className="flex justify-end gap-2 mb-3">
-                    <button onClick={onClose} disabled={busy}>Cancel</button>
-                    <button className="bg-rose-500 text-white rounded-lg px-3 py-2 disabled:opacity-50"
-                        onClick={submit} disabled={busy}>
-                    {busy ? 'signing in...' : 'sign in'}
+                    <button onClick={onClose} 
+                    disabled={busy}
+                    className="cursor-pointer hover:underline"
+                    >Cancel</button>
+                    <button
+                        className="bg-rose-500 text-white rounded-lg px-3 py-2 disabled:opacity-50 cursor-pointer"
+                        onClick={submit}
+                        disabled={busy}
+                    >
+                        {busy ? 'Processing...' : (isRegister ? 'Sign Up' : 'Sign In')}
                     </button>
                 </div>
-                {/*divider*/}
-                <div className="flex items-center my-3">
-                    <div className="flex-grow border-t border-gray-300"></div>
-                    <span className="mx-2 text-sm text-gray-500">or</span>
-                    <div className="flex-grow border-t border-gray-300"></div>
+                {/*Toggle link*/}
+                <div className="text-center text-sm mb-3">
+                    <span className="text-gray-500">
+                        {isRegister ? "Already have an account? "  : "Don't have an account? "}
+                    </span>
+                    <button
+                        onClick={() => {
+                        setIsRegister(!isRegister);
+                        setErr('');
+                    }}
+                    className="text-rose-500 font-medium hover:underline cursor-pointer">
+                        {isRegister ? "Sign In" : "Register"}
+                    </button>
                 </div>
-                {/*Google Login*/}
-                <button
-                    type="button"
-                    onClick={handleGoogleLogin}
-                    className="flex items-center justify-center w-full border rounded-lg px-3 py-2 hover:bg-gray-50"
-                >
-                    <FaGoogle className="mr-2 text-red-500"/>
-                    Continue with Google
-                </button>
+
+                <div className="flex items-center my-3">
+                <div className="flex-grow border-t border-gray-300"></div>
+                <span className="mx-2 text-sm text-gray-500">or</span>
+                <div className="flex-grow border-t border-gray-300"></div>
             </div>
+
+            <button
+                type="button"
+                onClick={handleGoogleLogin}
+                className="flex items-center justify-center w-full border rounded-lg px-3 py-3 hover:bg-gray-50 cursor-pointer"
+            >
+                <FaGoogle className="mr-2 text-red-500" />
+                {isRegister? "Sign up with Google" : "Continue with Google"}
+            </button>
         </div>
+    </div>
+
     );
 }

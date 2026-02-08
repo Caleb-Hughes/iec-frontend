@@ -30,7 +30,7 @@ function Hero() {
           className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-md rounded-full text-white mb-6 border border-white/20"
         >
           <Sparkles size={16} className="text-pink-400"/>
-          <span className="text-sm">Premium Black-Owned Beauty Studio</span>
+          <span className="text-sm">Premium Black-Owned Beauty Center</span>
         </motion.div>
          {/* Main Heading, staggered animation*/}
           <motion.h1

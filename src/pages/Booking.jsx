@@ -13,7 +13,7 @@ const isDate = (date) => format(date, 'yyyy-MM-dd');
 
 //Group time strings into morning, afternoon, evening
 const groupTimeSlots = (timeSlots) => {
-    const [h] = timeSlots.split(':').map(Number);
+    const [h] = String(timeSlots).split(':').map(Number);
     if (h < 12 ) return 'Morning';
     if (h < 17 ) return 'Afternoon';
     return 'Evening';
@@ -131,7 +131,7 @@ export default function BookingPage() {
 
         setServices(servicesArr);
         setStylists(stylistsArr);
-        setEligibleStylists(new Set(stylistsArr.map((st) => st._id)));
+        setEligibleStylists(new Set(stylistsArr.map((st) => st.id)));
     } catch (err) {
       setError('Failed to load data. Please try again later.');
     } finally {
@@ -155,7 +155,7 @@ useEffect(() => {
     //if no service selectetd allow alal stylists
 
     if (!selectedServiceId) {
-        setEligibleStylists(new Set(stylists.map((st) =>st._id)));
+        setEligibleStylists(new Set(stylists.map((st) =>st.id)));
         return
     }
 
@@ -178,12 +178,12 @@ useEffect(() => {
 
             if (!isMounted) return;
 
-            setEligibleStylists(new Set(arr.map((st) => st._id)));
+            setEligibleStylists(new Set(arr.map((st) => st.id)));
         } catch (err) {
             //fallback 
             const ids = stylists
             .filter((st) => Array.isArray(st.services) && st.services.includes(selectedServiceId))
-            .map((st) => st._id)
+            .map((st) => st.id)
 
             if (isMounted) setEligibleStylists(new Set(ids));
         } finally {
@@ -198,7 +198,7 @@ useEffect(() => {
         !selectedServiceId || eligibleStylists.has(stylistId);
 
     const filteredStylists = useMemo(() => {
-        return (stylists || []).filter((st) => isStylistEligible(st._id));
+        return (stylists || []).filter((st) => isStylistEligible(st.id));
     }, [stylists, eligibleStylists, selectedServiceId]);
 
 
@@ -277,8 +277,8 @@ useEffect(() => {
             setSuccessDetails({
                 date: selectedDate,
                 time: selectedSlot,
-                stylist: stylists.find((st) => st._id === selectedStylistId),
-                service: services.find((s => s._id === selectedServiceId)),
+                stylist: stylists.find((st) => st.id === selectedStylistId),
+                service: services.find((svc => svc.id === selectedServiceId)),
             });
 
 
@@ -305,8 +305,8 @@ useEffect(() => {
         confirm();
     };
 
-    const selectedStylistName = stylists.find((st) => st._id === selectedStylistId)?.name || "Selected Stylist";
-    const selectedServiceName = services.find((s) => s._id === selectedServiceId)?.name || "Selected Service";
+    const selectedStylistName = stylists.find((st) => st.id === selectedStylistId)?.name || "Selected Stylist";
+    const selectedServiceName = services.find((svc) => svc.id === selectedServiceId)?.name || "Selected Service";
 
     return (
         <div className ="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100">
@@ -339,7 +339,7 @@ useEffect(() => {
                     ) : null}
                     {hasSearched && !loadingSlots && slots.length === 0 && selectedDate && selectedStylistId ? (
                         <div className="max-w-4xl mx-auto text-sm text-gray-600">
-                            No Available time sloots found on {format(selectedDate, "PP")}. Try anotger day or stylist.
+                            No Available time slots found on {format(selectedDate, "PP")}. Try another day or stylist.
                         </div>
                     ) : null}
                     
@@ -354,7 +354,7 @@ useEffect(() => {
                             to12h={to12h}
                         />
                     )}
-                    {/*Coonfirm Panel*/}
+                    {/*Confirm Panel*/}
                     {showConfirmDialogue && selectedSlot && (
                         <ConfirmationPanel
                             selectedDate={selectedDate}
@@ -386,14 +386,14 @@ useEffect(() => {
                                 <div className="fixed inset-0 z-50 grid place-items-center bg-black/50">
                                     <div className="bg-white rounded-2xl w-[360px] p-5">
                                         <h3 className="font-semibold text-lg mb-2">Appointment booked!</h3>
-                                            <p className="font-semihold text-lg mb-2">
+                                            <p className="font-semibold text-lg mb-2">
                                             You&apos;re all set for {" "}
                                             {successDetails?.date ? format(new Date(successDetails.date), "PP") : ""}{" "}
                                             at {to12h(successDetails.time)} with {successDetails.stylist?.name}.
                                             </p>
                                             <div className="mt-4 justify-center flex gap-3">
                                                 <button
-                                                    className="bg-gray-900 text-white rounded-lg px-4 py=2 cursoor0pointer"
+                                                    className="bg-gray-900 text-white rounded-lg px-4 py-2 cursor-pointer"
                                                     onClick={() => navigate("/")}
                                                 >
                                                 Return To Home

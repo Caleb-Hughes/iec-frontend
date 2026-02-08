@@ -11,13 +11,13 @@ import Team from './pages/Team';
 import Gallery from './pages/Gallery'
 import MainEnder from './pages/Contact';
 import BookingPage from './pages/Booking'
-
+import AppointmentManager from "./Components/AppointmentManager";
 
 //function to scroll to top on route change
 function ScrollToTop() {
   const {pathname} = useLocation();
     useEffect(() => {
-    window.scrollTo(0, 0);
+      document.documentElement.scrollTo(0, 0);
   }, [pathname]);
   return null;
 }
@@ -64,9 +64,8 @@ export default function App() {
     //BrowerRouter to enable SPA routing in the app
   <AuthProvider>
    <BrowserRouter>
-      <div className ="bg-black border-0 m-0 p-0">
+      <ScrollToTop />
         <Header />
-        <ScrollToTop />
         <main className="pt-20 md:pt-24">
         <Routes>
           <Route path="/" element={<HomePage />} /> {/*Home route*/}
@@ -76,13 +75,13 @@ export default function App() {
           <Route path="/contact" element={<ContactPage />} />
           <Route path="/booking" element={<BookingPage />} />
           <Route path="/oauth-success" element={<OAuthSuccess />} />
+          <Route path="/appointments" element={<AppointmentManager/>} />
 
           {/*Catch-all route for undefined paths*/}
           <Route path="*" element={<HomePage />} />
         </Routes>
         </main>
-      </div>
-      <Footer />
+        <Footer />
 
     </BrowserRouter>
   </AuthProvider> 

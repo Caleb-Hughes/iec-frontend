@@ -13,17 +13,17 @@ export default function TimeSlotSelector({
     to12h,
 }) {
     const Groups = [
-        {key: "Morning", label: "Mornign", Icon: Sunrise},
+        {key: "Morning", label: "Morning", Icon: Sunrise},
         {key: "Afternoon", label:"Afternoon", Icon: Sun},
-        {key: "Night", label:"Night", Icon: Moon},
+        {key: "Evening", label:"Evening", Icon: Moon},
     ];
     
     return (
         <Card className="w-full max-w-4xl mx-auto shadow-lg">
-            <CardHeader className="border-b bg-gradient-to-r from-pink-50 to-purple-50">
+            <CardHeader className="border-b pt-4 bg-gradient-to-r from-pink-50 to-purple-50">
                 <div className="flex items-center justify-between gap-4">
                     <div>
-                        <CardTitle className="flec items-center gap-2">{staffName}</CardTitle>
+                        <CardTitle className="flex items-center gap-2">{staffName}</CardTitle>
                         <p className="text-sm text-gray-600 mt-1">{serviceName}</p>
                     </div>
 
@@ -37,7 +37,7 @@ export default function TimeSlotSelector({
                 <div className="space-y-6">
                     {Groups.map(({key, label, Icon}) => (
                         <div key={key}>
-                            <h3 className="flex items-center gap-2 mb-3 font-medium text-gray-700">
+                            <h3 className="flex items-center gap-2 mb-3 font-medium text-gray-700 ">
                                 <Icon className="w-5 h-5"/>
                                 {label}
                             </h3>
@@ -49,8 +49,8 @@ export default function TimeSlotSelector({
                                         variant={selectedSlot === slot ? "default" : "outline"}
                                         className={
                                             selectedSlot === slot
-                                                ? "h-12 bg-pink-600 hover:bg-pink-700 text-white"
-                                                : "h-12 hover:bg-pink-50 hover:border-pink-300"
+                                                ? "h-12 bg-pink-600 hover:bg-pink-700 text-white cursor-pointer"
+                                                : "h-12 hover:bg-pink-50 hover:border-pink-300 cursor-pointer"
                                         }
                                         onClick={() => onSelectedSlot(slot)}
                                     >

@@ -56,12 +56,6 @@ const TeamCarousel = ({ slides, options }) => {
     };
   }, [emblaApi]);
 
-  useEffect(() => {
-    if (!emblaApi) return;
-    // Debug: list scroll snaps
-    // console.log('Snaps:', emblaApi.scrollSnapList());
-  }, [emblaApi]);
-
   return (
     <section className="relative w-full group">
       <div className="text-white text-sm text-center mb-4 block md:hidden">
@@ -69,24 +63,23 @@ const TeamCarousel = ({ slides, options }) => {
       </div>
 
       <div
-        className="overflow-hidden overscroll-contain"
+        className="overflow-hidden"
         onMouseEnter={() => setIsHovering(true)}
         onMouseLeave={() => setIsHovering(false)}
       >
         <div
-          className="flex select-none touch-pan-x -ml-6 sm:-ml-6 lg:-ml-8"
+          className="overflow-hidden"
           ref={(el) => {
             emblaRef(el);
             viewportRef.current = el;
           }}
         >
-          <div className="flex gap-6 sm:px-6 lg:px-8">
+          <div className="flex -ml-4 sm:-ml-6 lg:-ml-8 touch-pan-y">
             {slides.map((member) => (
               <div
                 key={member.name}
-                className="flex-[0_0_100%] min-w-0 sm:flex-[0_0_calc(50%-12px)] lg:flex-[0_0_calc(33.333%-16px)]"
-              >
-                <div className="group relative bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 h-[500px] cursor-grab">
+                className="pl-4 sm:pl-6 lg:pl-8 flex-[0_0_80%] sm:flex-[0_0_calc(50%-12px)] lg:flex-[0_0_calc(33.333%-16px)] min-w-0">
+                <div className="group relative bg-white rounded-3xl overflow-hidden shadow-xl ring-1 ring-black/5 hover:shadow-2xl transition-all duration-300 h-[420px] sm:h-[480px] lg:h-[520px] cursor-grab">
                   <div className="absolute inset-0">
                     <img
                       src={member.img}
@@ -96,14 +89,14 @@ const TeamCarousel = ({ slides, options }) => {
                     <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
                   </div>
 
-                  <div className="relative h-full flex flex-col justify-end p-8">
+                  <div className="relative h-full flex flex-col justify-end p-5 sm:p-7">
                     <h3 className="text-3xl font-bold text-white mb-2">{member.name}</h3>
                     <p className="text-pink-400 font-semibold mb-2">{member.role}</p>
                     {member.specialty && <p className="text-white mb-4">{member.specialty}</p>}
                     <button
-                      className="mt-4 inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full text-white bg-gradient-to-r from-pink-600 to-purple-600 hover:shadow-lg hover:scale-105 transition-all duration-200 cursor-pointer"
+                      className="mt-4 w-full inline-flex items-center justify-center gap-2 px-5 py-3 rounded-full text-white bg-gradient-to-r from-pink-600 to-purple-600 hover:shadow-lg hover:scale-[1.02] transition-all duration-200 cursor-pointer"
                     >
-                      Book with {member.name}
+                      <span className="truncate">Book with {member.name}</span>
                     </button>
                   </div>
                 </div>

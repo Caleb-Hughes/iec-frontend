@@ -51,11 +51,11 @@ export default function ConfirmationPanel ({
                                 <p className="text-sm text-red-600">{errorMessage}</p>
                             ) : null}
 
-                            <div className="flex gap-3 pt-2">
+                            <div className="flex flex-col sm:flex-row gap-3 pt-2">
                                 <Button
                                     variant="outline"
                                     onClick={onCancel}
-                                    className="flex-1 border-gray-300 hover:bg-gray-50"
+                                    className="flex-1 border-gray-300 hover:bg-gray-50 cursor-pointer"
                                     disabled={confirming}
                                 >
                                     <X className="w-4 h-4 mr-2" />
@@ -64,7 +64,7 @@ export default function ConfirmationPanel ({
 
                                 <Button
                                     onClick={onConfirm}
-                                    className="flex-1 bg-pink-600 hover:bg-pink-700 text-white"
+                                    className="flex-1 bg-pink-600 hover:bg-pink-700 text-white cursor-pointer"
                                     disabled={confirming}
                                 >
                                     <CheckCircle2 className="w-4 h-4 mr-2" />

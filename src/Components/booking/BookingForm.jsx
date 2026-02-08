@@ -49,7 +49,7 @@ export default function BookingForm ({
     return (
         <Card className="w-full max-w-4xl mx-auto shadow-lg">
             <CardHeader className="bg-gradient-to-r from-pink-50 to-purple-50 border-b">
-                <CardTitle className="flex items-center gap-2 text-2xl">
+                <CardTitle className="flex pt-5 items-center gap-2 text-2xl">
                     <Sparkles className="w-6 h-6 text-pink-600"/>
                     Book Your Appointment
                 </CardTitle>
@@ -68,13 +68,13 @@ export default function BookingForm ({
                             onValueChange={(val) => setSelectedServiceId(val)}
                             disabled={loadingServices}
                         >
-                            <SelectTrigger className="h-12">
+                            <SelectTrigger className="h-12 cursor-pointer">
                                 <SelectValue placeholder="Select a service" />
                             </SelectTrigger>
 
                             <SelectContent>
                               {(services || []).map((s) => (
-                                <SelectItem key={s._id} value={s._id}>
+                                <SelectItem key={s.id} value={s.id}>
                                     {s.name} - ${s.price}
                                 </SelectItem>
                               ))}
@@ -93,13 +93,13 @@ export default function BookingForm ({
                             onValueChange={(val) => setSelectedStylistId(val)}
                             disabled={loadingStylist || disableStylistSelect}
                         >
-                            <SelectTrigger className="h-12">
+                            <SelectTrigger className="h-12 cursor-pointer">
                                 <SelectValue placeholder="Select a stylits"/>
                             </SelectTrigger>
 
                             <SelectContent>
                                 {(stylists || []).map((st) => (
-                                    <SelectItem key={st._id} value={st._id}>
+                                    <SelectItem key={st.id} value={st.id}>
                                         {st.name}
                                     </SelectItem>
                                 ))}
@@ -109,7 +109,7 @@ export default function BookingForm ({
 
                     {/* Date Picker*/}
                     <div className="space-y-2 md:col-span-2">
-                        <Label className="flex items-center gap-2">
+                        <Label className="flex items-center gap-2 ">
                             <CalendarIcon className="w-4 text-pink-600" />
                             Date
                         </Label>
@@ -118,10 +118,10 @@ export default function BookingForm ({
                             <PopoverTrigger asChild>
                                 <Button
                                     variant="outline"
-                                    className="w-full h-12 justify-start text-left font-normal"
+                                    className="w-full h-12 justify-start text-left font-normal cursor-pointer"
                                     disabled={!selectedServiceId || !selectedStylistId}
                                 >
-                                    <CalendarIcon className="w-full h-12 justify-start text-left font-normal"/>
+                                    <CalendarIcon className="w-full h-12 justify-start text-left font-normal "/>
                                     {selectedDate ? format(selectedDate, "PPP") : <span>Pick a date</span>}
                                 </Button>
                             </PopoverTrigger>
@@ -140,9 +140,10 @@ export default function BookingForm ({
                     {/*Search Button*/}
                     <div className="md:col-span-2">
                         <Button
-                            className="w-full h-12 bg-pink-600 hover:bg-pink-700 text-white"
+                            className="w-full h-12 bg-pink-600 hover:bg-pink-700 text-white cursor-pointer"
                             size="lg"
                             disabled={!canSearch || searching}
+                            onClick={onSearch}
                         >
                             <Search className="w-5 h-5 mr-2" />
                             {searching ? "Searching..." : "Search Available Times"}

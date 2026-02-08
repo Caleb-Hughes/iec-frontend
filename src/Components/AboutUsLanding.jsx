@@ -19,7 +19,7 @@ export default function AboutSection() {
           {/* TEXT COLUMN */}
           <motion.div
             initial={{ opacity: 0, x: -50 }} // start hidden and shifted left
-            animate={isInView ? { opacity: 1, x: 0 } : {}} // animate only when section is in view
+            animate={{ opacity: 1, x: 0}} // animate only when section is in view
             transition={{ duration: 0.8 }}
           >
             <div className="inline-block px-4 py-2 bg-pink-100 rounded-full text-pink-600 font-semibold text-sm mb-6">
@@ -56,7 +56,7 @@ export default function AboutSection() {
           {/* IMAGE COLUMN */}
           <motion.div
             initial={{ opacity: 0, x: 50 }}
-            animate={isInView ? { opacity: 1, x: 0 } : {}}
+            animate={{ opacity: 1, x: 0}}
             transition={{ duration: 0.8, delay: 0.2 }}
             className="relative"
           >
@@ -68,7 +68,7 @@ export default function AboutSection() {
             {/* Floating card */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
-              animate={isInView ? { opacity: 1, y: 0 } : {}}
+              animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.5 }}
               className="absolute -bottom-6 -left-6 bg-white p-6 rounded-xl shadow-xl border border-gray-100"
             >
@@ -88,7 +88,7 @@ export default function AboutSection() {
         {/* FEATURES GRID */}
         <motion.div
           initial={{ opacity: 0, y: 50 }}
-          animate={isInView ? { opacity: 1, y: 0 } : {}}
+          animate={{ opacity: 1, y: 0}}
           transition={{ duration: 0.8, delay: 0.8 }}
           className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-20"
         >
@@ -96,7 +96,7 @@ export default function AboutSection() {
             <motion.div
               key={feature.title}
               initial={{ opacity: 0, y: 20 }}
-              animate={isInView ? { opacity: 1, y: 0 } : {}}
+              animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.6 + index * 0.1 }} // stagger each card
               className="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-shadow border border-gray-100"
             >
