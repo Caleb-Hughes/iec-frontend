@@ -2,9 +2,9 @@ import {useEffect, useMemo, useState } from "react";
 import { Calendar as CalendarIcon, Clock, User, Scissors, X, CalendarClock } from "lucide-react";
 import {format} from "date-fns"
 import apiClient from "../api";
-import {Button} from "@/components/ui/button";
-import {Calendar} from "@/components/ui/calendar"
-import {Popover, PopoverContent, PopoverTrigger} from "@/components/ui/popover";
+import {Button} from "./ui/button";
+import {Calendar} from "./ui/calendar"
+import {Popover, PopoverContent, PopoverTrigger} from "./ui/popover";
 
 export default function AppointmentManager() {
     const [activeTab, setActiveTab] = useState("upcoming");

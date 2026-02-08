@@ -2,25 +2,25 @@ import React from "react";
 import {format} from "date-fns"
 import {Search, Calendar as CalendarIcon, User, Sparkles} from "lucide-react"
 
-import {Button} from "@/Components/ui/button"
+import {Button} from "./ui/button"
 import {
     Card,
     CardContent,
     CardDescription,
     CardHeader,
     CardTitle,
-} from "@/Components/ui/card"
+} from "./ui/card"
 
-import {Label} from "@/Components/ui/label"
+import {Label} from "./ui/label"
 import {
     Select,
     SelectContent,
     SelectItem,
     SelectTrigger, 
     SelectValue,
-} from "@/Components/ui/select"
-import {Popover, PopoverContent, PopoverTrigger} from "@/Components/ui/popover"
-import {Calendar} from "@/Components/ui/calendar"
+} from "./ui/select"
+import {Popover, PopoverContent, PopoverTrigger} from "./ui/popover"
+import {Calendar} from "./ui/calendar"
 
 export default function BookingForm ({
     services,

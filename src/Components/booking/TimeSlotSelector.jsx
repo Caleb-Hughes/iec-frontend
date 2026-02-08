@@ -1,8 +1,8 @@
 import React from "react";
 import {Clock, Sunrise, Sun, Moon} from "lucide-react"
-import {Card, CardContent, CardHeader, CardTitle} from "@/Components/ui/card"
-import {Button} from "@/Components/ui/button"
-import {Badge} from "@/Components/ui/badge"
+import {Card, CardContent, CardHeader, CardTitle} from "./ui/card"
+import {Button} from "./ui/button"
+import {Badge} from "./ui/badge"
 
 export default function TimeSlotSelector({
     staffName,
