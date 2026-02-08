@@ -1,9 +1,9 @@
 import React from "react";
 import {Calendar, Clock, User, CheckCircle2, X} from "lucide-react"
 import {format} from "date-fns"
-import { Card, CardContent } from "./ui/card";
-import {Button} from "./ui/button"
-import {Alert, AlertDescription} from "./ui/alert"
+import { Card, CardContent } from "../ui/card";
+import {Button} from "../ui/button"
+import {Alert, AlertDescription} from "../ui/alert"
 
 export default function ConfirmationPanel ({
     selectedDate,
