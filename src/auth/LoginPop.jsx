@@ -39,7 +39,7 @@ export default function LoginPop({open, onClose, onSuccess}) {
     };
     const handleGoogleLogin = () => {
         //open Google OAuth flow
-        const targetUrl = `${import.meta.env.VITE_API_URL}/api/auth/google`;
+        const targetUrl = `${import.meta.env.VITE_API_BASE_URL}/api/auth/google`;
         console.log("Attemmpting redicrect to:", targetUrl);
         window.location.href = targetUrl
        };
