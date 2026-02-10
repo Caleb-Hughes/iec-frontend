@@ -15,6 +15,10 @@ export default function ScrollToTop() {
             left: 0,
             behavior: "instant"
         });
+        const mainContent = document.querySelector('main');
+        if (mainContent) {
+            mainContent.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+        }
     }, [pathname]);
 
     return null;
