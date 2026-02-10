@@ -12,7 +12,7 @@ import Gallery from './pages/Gallery'
 import MainEnder from './pages/Contact';
 import BookingPage from './pages/Booking'
 import AppointmentManager from "./Components/AppointmentManager";
-import ScrollToTop from "./Componeents/ScrollToTop";
+import ScrollToTop from "./Components/ScrollToTop";
 
 // Home page component combining all sections
 function HomePage() {
