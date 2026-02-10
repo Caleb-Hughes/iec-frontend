@@ -12,15 +12,8 @@ import Gallery from './pages/Gallery'
 import MainEnder from './pages/Contact';
 import BookingPage from './pages/Booking'
 import AppointmentManager from "./Components/AppointmentManager";
+import ScrollToTop from "./Componeents/ScrollToTop";
 
-//function to scroll to top on route change
-function ScrollToTop() {
-  const {pathname} = useLocation();
-    useEffect(() => {
-      document.documentElement.scrollTo(0, 0);
-  }, [pathname]);
-  return null;
-}
 // Home page component combining all sections
 function HomePage() {
   return (
