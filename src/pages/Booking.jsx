@@ -52,7 +52,6 @@ export default function BookingPage() {
     const [successDetails, setSuccessDetails] = useState(null);
     const [confirming, setConfirming] = useState(false);
     const [confirmError, setConfirmError] = useState('');
-    const [pendingConfirmation, setPendingConfirmation] = useState(false);
     const [confirmSuccess, setConfirmSuccess] = useState(false);
     const [showConfirmDialogue, setShowConfirmDialogue] = useState(false);
     const navigate = useNavigate();
@@ -106,6 +105,15 @@ export default function BookingPage() {
 
         return [];
     };
+    const savePendingBooking = () => {
+        sessionStorage.setItem("pendingConfirmation", "true");
+        sessionStorage.setItem("pendingBooking", JSON.stringify({
+            selectedServiceId,
+            selectedStylistId,
+            selectedDate: selectedDate ? selectedDate.toISOString() : null,
+            selectedSlot,
+        }));
+    }
 
     const loadPendingBooking = () => {
         const pending = sessionStorage.getItem("pendingBooking");
@@ -119,16 +127,10 @@ export default function BookingPage() {
 
     const clearPendingBooking = () => {
         sessionStorage.removeItem("pendingBooking");
+        sessionStorage.removeItem("pendingConfirmation");
     };
 
-    const savePendingBooking = () => {
-        sessionStorage.setItem("pendingBooking", JSON.stringify({
-            selectedServiceId,
-            selectedStylistId,
-            selectedDate: selectedDate ? selectedDate.toISOString() : null,
-            selectedSlot,
-        }));
-    }
+    
     //Loading services and stylists on component mount
     useEffect(() => {
         let mounted = true;
@@ -221,12 +223,15 @@ useEffect(() => {
 
 useEffect(() => {
     if (!user) return;
-    if (!pendingConfirmation) return;
+    
+    const shouldConfirm = sessionStorage.getItem("pendingConfirmation") === "true";
+    if (!shouldConfirm) return;
 
     const pending = loadPendingBooking();
-    clearPendingBooking();
-    setPendingConfirmation(false);
-    if (!pending) return;
+    if (!pending) {
+        clearPendingBooking();
+        return;
+    }
 
     if (pending.selectedServiceId) setSelectedServiceId(pending.selectedServiceId);
     if (pending.selectedStylistId) setSelectedStylistId(pending.selectedStylistId);
@@ -235,9 +240,12 @@ useEffect(() => {
         setSelectedSlot(pending.selectedSlot);
         setShowConfirmDialogue(true);
     }
+    
+    clearPendingBooking();
+    
 
     confirm(pending);
-}, [user, pendingConfirmation]);
+}, [user]);
 
 const isStylistEligible = (stylistId) => 
     !selectedServiceId || eligibleStylists.has(stylistId);
@@ -348,7 +356,6 @@ const onConfirmClick = () => {
         
     if (!user) {
         savePendingBooking();
-        setPendingConfirmation(true);
         setLoginOpen(true);
         return;
     }
