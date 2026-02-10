@@ -1,7 +1,7 @@
 import {BrowserRouter, Routes, Route, Link, NavLink} from "react-router-dom";
 import {useEffect} from "react";
 import {AuthProvider, useAuth} from './auth/AuthContext';
-import{useNavigate, useLocation} from 'react-router-dom';
+import{useNavigate} from 'react-router-dom';
 import apiClient from "./api";
 import Header from './Components/NavBar'
 import Hero from './Components/Hero'
