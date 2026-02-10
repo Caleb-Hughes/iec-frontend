@@ -52,6 +52,7 @@ export default function BookingPage() {
     const [successDetails, setSuccessDetails] = useState(null);
     const [confirming, setConfirming] = useState(false);
     const [confirmError, setConfirmError] = useState('');
+    const [pendingConfirmation, setPendingConfirmation] = useState(false);
     const [confirmSuccess, setConfirmSuccess] = useState(false);
     const [showConfirmDialogue, setShowConfirmDialogue] = useState(false);
     const navigate = useNavigate();
@@ -105,6 +106,29 @@ export default function BookingPage() {
 
         return [];
     };
+
+    const loadPendingBooking = () => {
+        const pending = sessionStorage.getItem("pendingBooking");
+        if (!pending) return null;
+        try {
+            return JSON.parse(pending);
+        } catch {
+            return null;
+        }
+    };
+
+    const clearPendingBooking = () => {
+        sessionStorage.removeItem("pendingBooking");
+    };
+
+    const savePendingBooking = () => {
+        sessionStorage.setItem("pendingBooking", JSON.stringify({
+            selectedServiceId,
+            selectedStylistId,
+            selectedDate: selectedDate ? selectedDate.toISOString() : null,
+            selectedSlot,
+        }));
+    }
     //Loading services and stylists on component mount
     useEffect(() => {
         let mounted = true;
@@ -194,119 +218,146 @@ useEffect(() => {
         isMounted = false;
     };
 }, [selectedServiceId, stylists]);
-    const isStylistEligible = (stylistId) => 
-        !selectedServiceId || eligibleStylists.has(stylistId);
 
-    const filteredStylists = useMemo(() => {
-        return (stylists || []).filter((st) => isStylistEligible(st.id));
-    }, [stylists, eligibleStylists, selectedServiceId]);
+useEffect(() => {
+    if (!user) return;
+    if (!pendingConfirmation) return;
+
+    const pending = loadPendingBooking();
+    clearPendingBooking();
+    setPendingConfirmation(false);
+    if (!pending) return;
+
+    if (pending.selectedServiceId) setSelectedServiceId(pending.selectedServiceId);
+    if (pending.selectedStylistId) setSelectedStylistId(pending.selectedStylistId);
+    if (pending.selectedDate) setSelectedDate(new Date(pending.selectedDate));
+    if (pending.selectedSlot) {
+        setSelectedSlot(pending.selectedSlot);
+        setShowConfirmDialogue(true);
+    }
+
+    confirm(pending);
+}, [user, pendingConfirmation]);
+
+const isStylistEligible = (stylistId) => 
+    !selectedServiceId || eligibleStylists.has(stylistId);
+
+const filteredStylists = useMemo(() => {
+    return (stylists || []).filter((st) => isStylistEligible(st.id));
+}, [stylists, eligibleStylists, selectedServiceId]);
 
 
-    const fetchAvailableTimeSlots = async () => {
-        console.log("fetchAvailableTimeSlots fired");
-        if (loadingSlots) return;
-        if (!selectedStylistId || !selectedDate) return;
+const fetchAvailableTimeSlots = async () => {
+    console.log("fetchAvailableTimeSlots fired");
+    if (loadingSlots) return;
+    if (!selectedStylistId || !selectedDate) return;
 
-        setHasSearched(true);
-        setSlotsError(null);
+    setHasSearched(true);
+    setSlotsError(null);
 
-        try {
-            setLoadingSlots(true);
+    try {
+        setLoadingSlots(true);
 
-            const response = await apiClient.get(
-                `/stylists/${selectedStylistId}/available-slots`,
-                {params: {date: isDate(selectedDate), serviceId: selectedServiceId}}
-            );
+        const response = await apiClient.get(
+            `/stylists/${selectedStylistId}/available-slots`,
+            {params: {date: isDate(selectedDate), serviceId: selectedServiceId}}
+        );
 
-            const slotsArray = normalizeSlots(response?.data);
-            setSlots(Array.isArray(slotsArray) ? slotsArray: []);
-        } catch (err) {
-            console.error(err);
-            setSlots([]);
-            setSlotsError("Failed to load available time slots. Please try again later.");
-        } finally {
-            setLoadingSlots(false);
-        }
-    };
-    // Gropu slots for UI
+        const slotsArray = normalizeSlots(response?.data);
+        setSlots(Array.isArray(slotsArray) ? slotsArray : []);
+    } catch (err) {
+        console.error(err);
+        setSlots([]);
+        setSlotsError("Failed to load available time slots. Please try again later.");
+    } finally {
+        setLoadingSlots(false);
+    }
+};
+// Group slots for UI
 
-    const groupedSlots = useMemo(() => {
-        const groups = {Morning: [], Afternoon: [], Evening: []};
-        (Array.isArray(slots) ? slots : []).forEach((slot) => {
-            const key = groupTimeSlots(slot);
-            groups[key].push(slot);
-        });
-        return groups;
-    }, [slots]);
+const groupedSlots = useMemo(() => {
+    const groups = {Morning: [], Afternoon: [], Evening: []};
+    (Array.isArray(slots) ? slots : []).forEach((slot) => {
+        const key = groupTimeSlots(slot);
+        groups[key].push(slot);
+    });
+    return groups;
+}, [slots]);
 
-    //Slot click to open confirm panel
-    const onSelectedSlot = (slot) => {
-        setSelectedSlot(slot);
+//Slot click to open confirm panel
+const onSelectedSlot = (slot) => {
+    setSelectedSlot(slot);
+    setConfirmError("");
+    setShowConfirmDialogue(true);
+};
+
+//Backend post to confirm appointment
+
+const confirm = async (override) => {
+    try {
+        setConfirming(true);
         setConfirmError("");
-        setShowConfirmDialogue(true)
-    };
 
-    //Backend post to confirm appointment
+        const svcId = override?.selectedServiceId ?? selectedServiceId;
+        const styId = override?.selectedStylistId ?? selectedStylistId;
+        const dateObj = override?.selectedDate ? new Date(override.selectedDate) : selectedDate;
+        const slot = override?.selectedSlot ?? selectedSlot;
 
-    const confirm = async () => {
-        try {
-            setConfirming(true);
-            setConfirmError("");
+        //Guard
 
-            //Guaard
-
-            if(!selectedServiceId || !selectedStylistId || !selectedDate || !selectedSlot ) {
-                setConfirmError('Missing booking information (service, stylist, date, or time).');
-                return;
-            }
-
-            //Iso datetime
-            const [hh, mm] = String(selectedSlot).split(":").map(Number);
-            const localDateTime = new Date(selectedDate);
-            localDateTime.setHours(hh, mm, 0, 0);
-
-            const payload = {
-                service: selectedServiceId,
-                stylist: selectedStylistId,
-                date: localDateTime.toISOString(),
-            };
-
-            const res = await apiClient.post("/appointments", payload);
-            console.log("book success:", res.data);
-
-            setSuccessDetails({
-                date: selectedDate,
-                time: selectedSlot,
-                stylist: stylists.find((st) => st.id === selectedStylistId),
-                service: services.find((svc => svc.id === selectedServiceId)),
-            });
-
-
-            setConfirmSuccess(true);
-            setShowConfirmDialogue(false);
-            setSelectedSlot(null);
-        } catch (e) {
-            console.error("Book failed:", e);
-            setConfirmError(e?.response?.data?.message || "Could not book appointment");
-        } finally {
-            setConfirming(false);
-        }
-
-    };
-
-    const onConfirmClick = () => {
-        if (!selectedSlot) return;
-        
-        if (!user) {
-            setLoginOpen(true);
+        if(!svcId || !styId || !dateObj || !slot ) {
+            setConfirmError('Missing booking information (service, stylist, date, or time).');
             return;
         }
 
-        confirm();
+        //Iso datetime
+        const [hh, mm] = String(slot).split(":").map(Number);
+        const localDateTime = new Date(dateObj);
+        localDateTime.setHours(hh, mm, 0, 0);
+
+        const payload = {
+            service: svcId,
+            stylist: styId,
+            date: localDateTime.toISOString(),
+        };
+
+        const res = await apiClient.post("/appointments", payload);
+        console.log("book success:", res.data);
+
+        setSuccessDetails({
+            date: dateObj,
+            time: slot,
+            stylist: stylists.find((st) => st.id === styId),
+            service: services.find((svc => svc.id === svcId)),
+        });
+
+        setConfirmSuccess(true);
+        setShowConfirmDialogue(false);
+        setSelectedSlot(null);
+    } catch (e) {
+        console.error("Book failed:", e);
+        setConfirmError(e?.response?.data?.message || "Could not book appointment");
+    } finally {
+        setConfirming(false);
+        }
+
     };
 
-    const selectedStylistName = stylists.find((st) => st.id === selectedStylistId)?.name || "Selected Stylist";
-    const selectedServiceName = services.find((svc) => svc.id === selectedServiceId)?.name || "Selected Service";
+const onConfirmClick = () => {
+    if (!selectedSlot) return;
+        
+    if (!user) {
+        savePendingBooking();
+        setPendingConfirmation(true);
+        setLoginOpen(true);
+        return;
+    }
+
+    confirm();
+};
+
+const selectedStylistName = stylists.find((st) => st.id === selectedStylistId)?.name || "Selected Stylist";
+const selectedServiceName = services.find((svc) => svc.id === selectedServiceId)?.name || "Selected Service";
 
     return (
         <div className ="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100">
@@ -378,7 +429,6 @@ useEffect(() => {
                                 onClose={() => setLoginOpen(false)}
                                 onSuccess={() => {
                                     setLoginOpen(false);
-                                    confirm();
                                 }}
                             />
                             {/* Success Modal */}

@@ -4,12 +4,13 @@ import {HiOutlineBars3, HiOutlineXMark} from 'react-icons/hi2';
 import {User, LogOut, LogIn} from "lucide-react";
 import {useAuth} from '../auth/AuthContext';
 import LoginPop from '../auth/LoginPop';
-import logo from './../assets/Imgs/logo.png'; 
+import logo from './../assets/Imgs/logo.png';
 
 //function to close mobile menu on link click
 export default function Header ()  {
     const [menuOpen, setMenuOpen] = useState(false);
     const [loginOpen, setLoginOpen] = useState(false);
+    
 
     const {user, logout} = useAuth();
 
@@ -17,6 +18,8 @@ export default function Header ()  {
     const handleLinkClick = () => {
         setMenuOpen(false);
     };
+    
+    
 
     //Handle Sign Out
     const handleSignOut = () => {
