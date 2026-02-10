@@ -23,6 +23,7 @@ export default function Header ()  {
         logout();
         setMenuOpen(false);
     }
+    const firstName = (user?.name || "").trim().split(/\s+/)[0] || "Client"; //Fallback to "Client" if no name or split fails
 
     return (
     <>
@@ -52,7 +53,7 @@ export default function Header ()  {
                         <span className="text-sm font-medium text-gray-600 flex items-center gap-1">
                             <User className="w-4 h-4 text-pink-500"/>
                             {/*Display Users Name or fallback*/}
-                            {user.name || "Client"}
+                            {firstName || "Client"}
                         </span>
                         <button
                             onClick={logout}
@@ -108,7 +109,7 @@ export default function Header ()  {
                         <>
                             <div className="px-3 py-2 text-pink-100 text-sm flex items-center gap-2">
                                 <User className="w-4 h-4"/>
-                                Hi, {user.name || "Client"}
+                                Hi, {firstName || "Client"}
                             </div>
                             <button
                                 onClick={handleSignOut}

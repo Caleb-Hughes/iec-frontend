@@ -6,7 +6,8 @@ import {useAuth} from './AuthContext';
 export default function LoginPop({open, onClose, onSuccess}) {
     const { setUser } = useAuth();
     const [isRegister, setIsRegister] = useState(false);
-    const [name, setName]  = useState('');
+    const [firstName, setFirstName]  = useState('');
+    const [lastName, setLastName]  = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [err,setErr] = useState('')
@@ -18,11 +19,29 @@ export default function LoginPop({open, onClose, onSuccess}) {
         try {
             setBusy(true); 
             setErr('');
+
+            //Validation guard
+            if (isRegister && (!firstName.trim() || !lastName.trim())) {
+                setErr("Please enter both first and last names.");
+                setBusy(false);
+                return;
+            }
+
+    
+            if (!email.trim() || !password) {
+                setErr("Email and password are required.");
+                setBusy(false);
+                return;
+            }
             //Choosing endpoint based on mode
             const route = isRegister ? '/auth/register' : '/auth/login' ;
 
             const payload = isRegister 
-                ? {name, email: email.trim().toLowerCase(), password}
+                ? {
+                    name: `${firstName.trim()} ${lastName.trim()}`,
+                    email: email.trim().toLowerCase(), 
+                    password
+                }
                 : {email: email.trim().toLowerCase(), password};
 
             const r = await apiClient.post(route, payload, {withCredentials: true}
@@ -53,13 +72,22 @@ export default function LoginPop({open, onClose, onSuccess}) {
 
                 {/*Show Name input only if registering*/}
                 {isRegister && (
-                    <input
-                        className="w-full border rounded-lg px-3 py-2 mb-2"
-                        placeholder="Full Name"
-                        value={name}
-                        onChange={(e) => setName(e.target.value)}
+                    <div className="flex gap-2 mb-2">
+                        <input
+                        className="w-full border rounded-lg px-3 py-2"
+                        placeholder="First Name"
+                        value={firstName}
+                        onChange={(e) => setFirstName(e.target.value)}
                         disabled={busy}
-                    />
+                        />
+                        <input
+                        className="w-full border rounded-lg px-3 py-2"
+                        placeholder="Last Name"
+                        value={lastName}
+                        onChange={(e) => setLastName(e.target.value)}
+                        disabled={busy}
+                        />
+                    </div>
                 )}
             
                 <input
@@ -76,6 +104,7 @@ export default function LoginPop({open, onClose, onSuccess}) {
                     placeholder="Password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
+                    disabled={busy}
                 />
 
                 {err && <div className="text-red-600 text-sm mb-3">{err}</div>}
@@ -102,6 +131,8 @@ export default function LoginPop({open, onClose, onSuccess}) {
                         onClick={() => {
                         setIsRegister(!isRegister);
                         setErr('');
+                        setFirstName('');
+                        setLastName('');
                     }}
                     className="text-rose-500 font-medium hover:underline cursor-pointer">
                         {isRegister ? "Sign In" : "Register"}
