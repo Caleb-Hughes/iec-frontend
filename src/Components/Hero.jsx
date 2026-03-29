@@ -2,7 +2,7 @@ import React from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
 import {motion} from 'framer-motion';
 import {Sparkles, ArrowRight} from "lucide-react";
-import heroImg from './../assets/Imgs/heroPlaceHolder.png'; 
+import heroImg from './../assets/Imgs/newHero.png'; 
 
 
 function Hero() {

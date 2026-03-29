@@ -10,9 +10,6 @@ const apiClient = axios.create({
     withCredentials: true, 
 });
 
-//attach JWT token to request headers when available
-
-
 //auto-logout on 401 response
 apiClient.interceptors.response.use(
     (response) => response,
