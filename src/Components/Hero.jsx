@@ -8,7 +8,7 @@ import heroImg from './../assets/Imgs/newHero.png';
 function Hero() {
   const navigate = useNavigate();
   return (
-    <section className="relative w-full min-h-screen bg-no-repeat pt-20 md:bg-cover bg-center md:bg-fixed mt-0"
+    <section className="relative w-full min-h-screen pt-20 mt-0 bg-no-repeat bg-cover bg-[center_top] md:bg-center md:bg-fixed"
       style={{backgroundImage: `url(${heroImg})`}}> 
 
       {/* Overlay for better text visibility */}
